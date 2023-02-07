@@ -11,7 +11,6 @@ Prior Art: https://github.com/autonome/ipp
 - https://web3.storage pinning service
 - Smart Contract data storage
 
-
 ## Contract
 
 Once we have the cid we can deploy and update the blog’s smart contract. This contract will maintain two different types of lists.

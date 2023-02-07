@@ -12,9 +12,7 @@ async function main() {
 
   // We get the contract to deploy
   const FanList = await ethers.getContractFactory('Blog')
-  const contract = await FanList.deploy(
-    process.env.BLOG_NAME
-  )
+  const contract = await FanList.deploy(process.env.BLOG_NAME)
   console.log('TX:', contract.deployTransaction.hash)
 
   await contract.deployTransaction.wait(5)

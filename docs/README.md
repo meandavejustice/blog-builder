@@ -1,3 +1,3 @@
 # Documentation
 
-* [architecture.md](./architecture.md)
+- [architecture.md](./architecture.md)

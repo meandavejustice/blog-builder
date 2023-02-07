@@ -1359,7 +1359,7 @@ contract Blog is AccessControlEnumerable {
   Post[] private posts;
   string public publicKey;
   string public name;
-  string public version = "1.0.0";
+  string public version = '1.0.0';
 
   event Added(uint listNumber);
 
@@ -1370,12 +1370,15 @@ contract Blog is AccessControlEnumerable {
   }
 
   // post write functions
-  function add(InputPost memory _info) public onlyRole(DEFAULT_ADMIN_ROLE) returns(uint listNumber) {
+  function add(
+    InputPost memory _info
+  ) public onlyRole(DEFAULT_ADMIN_ROLE) returns (uint listNumber) {
     Post memory newPost = Post({
       cid: _info.cid,
       title: _info.title,
       tags: _info.tags,
       author: _msgSender(),
+      // solhint-disable-next-line not-rely-on-time
       addDate: block.timestamp
     });
     posts.push(newPost);
@@ -1383,19 +1386,23 @@ contract Blog is AccessControlEnumerable {
     return posts.length - 1;
   }
 
-  function getPost(uint idx) public view returns(Post memory) {
+  function getPost(uint idx) public view returns (Post memory) {
     return posts[idx];
   }
 
   // list access functions
-  function getListLength() public view returns(uint) {
+  function getListLength() public view returns (uint) {
     return posts.length;
   }
-  function getList() public view returns(Post[] memory) {
+
+  function getList() public view returns (Post[] memory) {
     return posts;
   }
 
-  function getListPaged(uint offset, uint limit) public view returns(Post[] memory) {
+  function getListPaged(
+    uint offset,
+    uint limit
+  ) public view returns (Post[] memory) {
     require(offset >= 0, 'Invalid offset.');
     uint listLength = posts.length;
     uint startReadIdx = offset == 0 ? offset : offset + 1;
@@ -1413,7 +1420,7 @@ contract Blog is AccessControlEnumerable {
   }
 
   // role functions
-  function getOwners() public virtual view returns (address[] memory) {
+  function getOwners() public view virtual returns (address[] memory) {
     uint len = getRoleMemberCount(DEFAULT_ADMIN_ROLE);
     address[] memory addOut = new address[](len);
     for (uint i; i < len; i++) {
@@ -1421,19 +1428,30 @@ contract Blog is AccessControlEnumerable {
     }
     return addOut;
   }
-  function isOwner(address _address) public virtual view returns (bool) {
+
+  function isOwner(address _address) public view virtual returns (bool) {
     return hasRole(DEFAULT_ADMIN_ROLE, _address);
   }
-  function addOwner(address _address) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+
+  function addOwner(
+    address _address
+  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     grantRole(DEFAULT_ADMIN_ROLE, _address);
   }
-  function removeOwner(address  _address) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+
+  function removeOwner(
+    address _address
+  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     revokeRole(DEFAULT_ADMIN_ROLE, _address);
   }
-  function swapOwner(address _address) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+
+  function swapOwner(
+    address _address
+  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     grantRole(DEFAULT_ADMIN_ROLE, _address);
     renounceRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }
+
   function renounceOwner() public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     renounceRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }

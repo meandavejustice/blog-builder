@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { ethers, network } from 'hardhat'
+
 import { Blog, Blog__factory } from '../typechain-types'
 
 let contract: Blog
@@ -10,9 +11,7 @@ describe('Blog', function () {
   })
   it('should deploy', async () => {
     const [signer] = await ethers.getSigners()
-    contract = await new Blog__factory()
-      .connect(signer)
-      .deploy('Test')
+    contract = await new Blog__factory().connect(signer).deploy('Test')
     await contract.deployed()
     expect(contract.address).to.exist
 
