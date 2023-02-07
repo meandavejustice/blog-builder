@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/bin/cli.ts"],
+  "sourcesContent": ["import { Type } from '@sinclair/typebox'\nimport Conf from 'conf'\nimport meow from 'meow'\n\nconst configSchema = Type.Object({\n  name: Type.String({ description: 'The name of the blog' }),\n  address: Type.String({ description: 'The contract address of the blog' })\n})\n\nconst config = new Conf({\n  projectName: 'blog-builder',\n  cwd: process.cwd(),\n  schema: configSchema.toJSON()\n})\n\nconst cli = meow(\n  `\nUsage\n  $ blog-builder <command>\n\nExamples\n  $ blog-builder setup <Blog Name>\n  $ blog-builder post <folder location>\n  $ blog-builder add-owner <address>\n  $ blog-builder remove-owner <address>\n  $ blog-builder info\n  $ blog-builder reset\n`,\n  { importMeta: import.meta }\n)\n\nconst [command, ...args] = cli.input\n\nconsole.log('Running', command, 'with', ...args)\nconsole.log('Current blog:', config.get('name'), config.get('address'))\n"],
+  "mappings": ";AAAA,SAAS,YAAY;AACrB,OAAO,UAAU;AACjB,OAAO,UAAU;AAEjB,MAAM,eAAe,KAAK,OAAO;AAAA,EAC/B,MAAM,KAAK,OAAO,EAAE,aAAa,uBAAuB,CAAC;AAAA,EACzD,SAAS,KAAK,OAAO,EAAE,aAAa,mCAAmC,CAAC;AAC1E,CAAC;AAED,MAAM,SAAS,IAAI,KAAK;AAAA,EACtB,aAAa;AAAA,EACb,KAAK,QAAQ,IAAI;AAAA,EACjB,QAAQ,aAAa,OAAO;AAC9B,CAAC;AAED,MAAM,MAAM;AAAA,EACV;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,EAYA,EAAE,YAAY,YAAY;AAC5B;AAEA,MAAM,CAAC,SAAS,GAAG,IAAI,IAAI,IAAI;AAE/B,QAAQ,IAAI,WAAW,SAAS,QAAQ,GAAG,IAAI;AAC/C,QAAQ,IAAI,iBAAiB,OAAO,IAAI,MAAM,GAAG,OAAO,IAAI,SAAS,CAAC;",
+  "names": []
+}
