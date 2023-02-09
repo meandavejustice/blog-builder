@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "hardhat test",
-    "compile": "rm -rf typechain-types artifacts cache && hardhat compile && prettier -w typechain-types && hardhat flat > typechain-types/raw.sol && rm -rf ../src/contracts/* && cp -R typechain-types/* ../src/contracts && ts-node scripts/backupABI.ts && mkdir ../src/contracts/versions && cp -R versions/* ../src/contracts/versions",
+    "compile": "rm -rf typechain-types artifacts cache && hardhat compile && prettier -w typechain-types && hardhat flat > typechain-types/raw.sol && rm -rf ../src/ui/contracts/* && cp -R typechain-types/* ../src/ui/contracts && ts-node scripts/backupABI.ts && mkdir ../src/ui/contracts/versions && cp -R versions/* ../src/ui/contracts/versions",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network mumbai",
     "deploy:mainnet": "hardhat run scripts/deploy.ts --network matic",
     "migrate:testnet": "hardhat run scripts/migrate.ts --network mumbai",
