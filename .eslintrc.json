@@ -13,7 +13,6 @@
     "no-console": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react/display-name": "off",
-    "react/react-in-jsx-scope": "off",
     "react/jsx-curly-brace-presence": [
       "warn",
       { "props": "never", "children": "never" }
@@ -35,7 +34,6 @@
       {
         "groups": [
           ["^@?\\\\w", "^\\\\u0000"],
-          ["^.+\\\\.s?css$"],
           ["^@/"],
           [
             "^\\\\./?$",
@@ -48,6 +46,7 @@
             "^\\\\.\\\\./\\\\.\\\\./\\\\.\\\\.(?!/?$)"
           ],
           ["^@/types"],
+          ["^.+\\\\.s?css$"],
           ["^"]
         ]
       }

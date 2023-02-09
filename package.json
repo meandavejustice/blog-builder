@@ -7,8 +7,8 @@
   "scripts": {
     "lint": "eslint . --fix && prettier -w . && cd contracts && npm run lint",
     "build:cli": "esbuild src/bin/cli.ts --platform=node --target=node16 --sourcemap --packages=external --outfile=dist/bin/cli.js",
-    "build:ui": "rm -rf dist/ui/* && node esbuild.mjs",
-    "dev": "node esbuild-serve.mjs",
+    "build:ui": "rm -rf dist/ui && vite build src/ui --outDir build && mv src/ui/build dist/ui",
+    "dev": "vite src/ui --open",
     "prepare": "husky install",
     "prepack": "npm run build:cli && npm run build:ui"
   },
@@ -16,7 +16,6 @@
     "blog-builder": "./dist/bin/cli.js"
   },
   "devDependencies": {
-    "@chialab/esbuild-plugin-html": "^0.17.2",
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
     "@types/react": "^18.0.27",
@@ -35,8 +34,11 @@
     "prettier": "^2.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vite": "^4.1.1",
+    "vite-tsconfig-paths": "^4.0.5"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
