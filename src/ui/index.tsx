@@ -1,6 +1,7 @@
 import 'normalize.css'
 import './index.css'
 import HomeView from './views/Home'
+import PostView from './views/Post'
 import React from 'react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -16,8 +17,12 @@ const router = createHashRouter([
     element: <HomeView />,
     children: [
       {
+        path: 'post/:cid',
+        element: <PostView /> // TODO: add a view for a post
+      },
+      {
         path: 'post',
-        element: null, // TODO: add a view for a post
+        element: <PostView />, // TODO: add a view for a post
         loader: undefined // TODO: add a loader for post
       }
     ]

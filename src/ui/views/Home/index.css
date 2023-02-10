@@ -1,3 +1,8 @@
 .home-view {
   /* TODO: Add home view styles */
 }
+
+.blog-title {
+  font-size: var(--step-1);
+  margin: var(--space-xl) 0;
+}
