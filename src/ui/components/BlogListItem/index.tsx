@@ -11,7 +11,7 @@ const BlogListItem = ({ post }: { post: PostItem }) => {
         <h3 className="blog-list-item__title">
           <Link to={`/post/${post.cid}`}>{post.title}</Link>
         </h3>
-        <p className="blog-list-item__author">{post.author}</p>
+        <p className="blog-list-item__author font-bold mb-4">{post.author}</p>
         <div className="blog-list-item__excerpt">{post.excerpt}</div>
       </div>
       <div className="blog-list-item__thumb">

@@ -4,5 +4,9 @@
 
 .blog-title {
   font-size: var(--step-1);
-  margin: var(--space-xl) 0;
+  padding: var(--space-xl) 0;
+}
+
+.blog-title a {
+  color: inherit;
 }
