@@ -11,10 +11,7 @@
 
 @media screen and (max-width: 767px) {
   .blog-layout {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'aside'
-      'content';
+    display: block;
   }
 }
 
@@ -25,10 +22,6 @@
 .blog-aside {
   min-width: 1px;
   grid-area: aside;
-}
-
-.blog-entry__title {
-  margin: var(--space-xl) 0;
 }
 
 .post-not-found {

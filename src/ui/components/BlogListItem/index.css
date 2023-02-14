@@ -17,15 +17,6 @@
 	}
 } */
 
-@media screen and (max-width: 767px) {
-  .blog-list-item {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'thumb'
-      'content';
-  }
-}
-
 .blog-list-item__content {
   grid-area: content;
 }
@@ -60,4 +51,13 @@
 .blog-list-item__title {
   font-size: var(--step-3);
   margin: 0 0 var(--space-s) 0;
+}
+
+@media screen and (max-width: 767px) {
+  .blog-list-item {
+    display: block;
+  }
+  .blog-list-item__thumb {
+    margin-top: 1rem;
+  }
 }
