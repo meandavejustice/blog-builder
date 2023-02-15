@@ -28,6 +28,10 @@
 
 .blog-list-item__thumb img {
   max-width: 100%;
+  width: 100%;
+  /* background-color: #fff; */
+  /* aspect-ratio: 1/1; */
+  /* object-fit: contain; */
 }
 
 .blog-list-item__date {

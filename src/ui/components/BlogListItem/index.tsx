@@ -1,9 +1,24 @@
 import './index.css'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import remarkParse from 'remark-parse'
 import { PostItem } from 'src/ui/types'
+import { unified } from 'unified'
 
 const BlogListItem = ({ post }: { post: PostItem }) => {
+  let thumbnail = null
+
+  const tree = unified().use(remarkParse).parse(post.content)
+
+  const firstEl = tree.children[0]
+  if (firstEl.type === 'paragraph') {
+    if (firstEl.children[0].type === 'image') {
+      const image = firstEl.children[0]
+      console.log(image)
+      thumbnail = image.url
+    }
+  }
+
   return (
     <div className="blog-list-item">
       <div className="blog-list-item__content">
@@ -23,8 +38,8 @@ const BlogListItem = ({ post }: { post: PostItem }) => {
         <div className="blog-list-item__excerpt">{post.excerpt}</div>
       </div>
       <div className="blog-list-item__thumb">
-        {post.thumbnail && (
-          <img src={post.thumbnail} alt={`thumbnail for ${post.title}`} />
+        {thumbnail && (
+          <img src={thumbnail} alt={`thumbnail for ${post.title}`} />
         )}
       </div>
     </div>

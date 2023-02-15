@@ -26,9 +26,8 @@ Leo duis ut diam quam nulla porttitor. Laoreet sit amet cursus sit amet dictum s
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     author: 'Web3 Bobby',
     published: '1/20/23',
-    thumbnail:
-      'https://bafybeihez3bnoxj32ekv3mb4ckurzsdfngn27borkcgf5gprvnla5wtide.ipfs.nftstorage.link/grass.png',
-    content: `Markdown is intended to be as easy-to-read and easy-to-write as is feasible.
+    content: `![](https://bafybeihez3bnoxj32ekv3mb4ckurzsdfngn27borkcgf5gprvnla5wtide.ipfs.nftstorage.link/grass.png)
+    Markdown is intended to be as easy-to-read and easy-to-write as is feasible.
 
 Readability, however, is emphasized above all else. A Markdown-formatted
 document should be publishable as-is, as plain text, without looking
