@@ -1,23 +1,78 @@
 import './index.css'
+import fm from '../../../plugins/frontmatter'
 import Header from '../../components/Header'
 import { posts } from '../../data/posts'
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
+import React, { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import rehypeStringify from 'rehype-stringify'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkGfm from 'remark-gfm'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import remarkStringify from 'remark-stringify'
+import { unified } from 'unified'
 
 const PostView = () => {
   const { cid } = useParams()
+  const [markd, setMarkd] = useState('')
+  const [title, setTitle] = useState('')
+  const [, setExcerpt] = useState('')
+  const [content, setContent] = useState('')
   const post = posts.find((post) => post.cid === cid)
+
+  // fetch the markdown
+  useMemo(() => {
+    if (!post) return
+    const getMarkdown = async () => {
+      fetch(post.content)
+        .then((response) => response.text())
+        .then((result) => {
+          setMarkd(result)
+        })
+    }
+    getMarkdown()
+  }, [post])
+
+  // get parsed markdown content
+  useMemo(() => {
+    if (!markd) return
+    const md = unified()
+      .use(remarkParse)
+      .use(remarkFrontmatter)
+      .use(remarkRehype)
+      .use(remarkGfm)
+      .use(rehypeStringify)
+      .process(markd)
+    md.then((res) => {
+      console.log(res.value)
+      if (res.value) setContent(res.value as any)
+    })
+  }, [markd])
+
+  // get metadata/frontmatter
+  useMemo(() => {
+    if (!markd) return
+    const frontMatter = unified()
+      .use(remarkParse)
+      .use(remarkStringify)
+      .use(remarkFrontmatter)
+      .use(fm)
+      .process(markd)
+    frontMatter.then((res: any) => {
+      if (res.data.matter.title) setTitle(res.data.matter.title)
+      if (res.data.matter.excerpt) setExcerpt(res.data.matter.excerpt)
+    })
+  }, [markd])
 
   if (post) {
     return (
       <div className="post-view view ">
-        <div className="container">
+        <div className="container min-h-screen">
           <Header />
           <div className="blog-layout">
             <div className="blog-main">
               <h2 className="blog-entry__title font-bold max-w-5xl mb-4">
-                {post.title}
+                {title}
               </h2>
 
               <p className="blog-entry-item__author flex items-center gap-2">
@@ -30,21 +85,11 @@ const PostView = () => {
                 </span>
               </p>
 
-              <hr className="my-8 border-teal-600 opacity-50 dark:border-teal-500" />
-
-              <div className="blog-entry-item__content pb-24">
-                <div className="blog-entry-item__thumb">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      className="mb-8"
-                      alt={`thumbnail for: ${post.title}`}
-                    />
-                  )}
-                </div>
-                <div className="prose prose-lg dark:prose-invert blog-entry__content">
-                  <ReactMarkdown>{post.content}</ReactMarkdown>
-                </div>
+              <div className="blog-entry-item__content pb-24 py-6">
+                <div
+                  className="prose prose-lg dark:prose-invert blog-entry__content"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                ></div>
               </div>
             </div>
             <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
