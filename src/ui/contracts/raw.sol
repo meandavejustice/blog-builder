@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIXED
 
-// Sources flattened with hardhat v2.12.6 https://hardhat.org
+// Sources flattened with hardhat v2.12.7 https://hardhat.org
 
 // File @openzeppelin/contracts/access/IAccessControl.sol@v4.8.1
 
@@ -1342,16 +1342,14 @@ pragma solidity ^0.8.17;
 
 // how we store it internally
 struct Post {
-  string cid;
-  string title;
+  string url;
   string[] tags;
   address author;
-  uint addDate;
+  uint published;
 }
 
 struct InputPost {
-  string cid;
-  string title;
+  string url;
   string[] tags;
 }
 
@@ -1374,12 +1372,11 @@ contract Blog is AccessControlEnumerable {
     InputPost memory _info
   ) public onlyRole(DEFAULT_ADMIN_ROLE) returns (uint listNumber) {
     Post memory newPost = Post({
-      cid: _info.cid,
-      title: _info.title,
+      url: _info.url,
       tags: _info.tags,
       author: _msgSender(),
       // solhint-disable-next-line not-rely-on-time
-      addDate: block.timestamp
+      published: block.timestamp
     });
     posts.push(newPost);
     emit Added(posts.length - 1);

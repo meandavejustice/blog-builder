@@ -28,37 +28,33 @@ import type {
 } from '../common'
 
 export type InputPostStruct = {
-  cid: PromiseOrValue<string>
-  title: PromiseOrValue<string>
+  url: PromiseOrValue<string>
   tags: PromiseOrValue<string>[]
 }
 
-export type InputPostStructOutput = [string, string, string[]] & {
-  cid: string
-  title: string
+export type InputPostStructOutput = [string, string[]] & {
+  url: string
   tags: string[]
 }
 
 export type PostStruct = {
-  cid: PromiseOrValue<string>
-  title: PromiseOrValue<string>
+  url: PromiseOrValue<string>
   tags: PromiseOrValue<string>[]
   author: PromiseOrValue<string>
-  addDate: PromiseOrValue<BigNumberish>
+  published: PromiseOrValue<BigNumberish>
 }
 
-export type PostStructOutput = [string, string, string[], string, BigNumber] & {
-  cid: string
-  title: string
+export type PostStructOutput = [string, string[], string, BigNumber] & {
+  url: string
   tags: string[]
   author: string
-  addDate: BigNumber
+  published: BigNumber
 }
 
 export interface BlogInterface extends utils.Interface {
   functions: {
     'DEFAULT_ADMIN_ROLE()': FunctionFragment
-    'add((string,string,string[]))': FunctionFragment
+    'add((string,string[]))': FunctionFragment
     'addOwner(address)': FunctionFragment
     'getList()': FunctionFragment
     'getListLength()': FunctionFragment

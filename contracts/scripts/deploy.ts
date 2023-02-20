@@ -22,7 +22,7 @@ async function main() {
   console.log(
     'Now run: npm run verify:testnet',
     contract.address,
-    process.env.BLOG_NAME
+    `"${process.env.BLOG_NAME}"`
   )
 }
 
