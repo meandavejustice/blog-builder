@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { ethers } from 'hardhat'
+import { Blog__factory } from '../typechain-types'
 
 async function main() {
   if (!process.env.BLOG_NAME) throw new Error('Missing BLOG_NAME env')
@@ -11,8 +12,8 @@ async function main() {
   console.log('Account balance:', (await deployer.getBalance()).toString())
 
   // We get the contract to deploy
-  const FanList = await ethers.getContractFactory('Blog')
-  const contract = await FanList.deploy(process.env.BLOG_NAME)
+  const Blog = (await ethers.getContractFactory('Blog')) as Blog__factory
+  const contract = await Blog.deploy(process.env.BLOG_NAME)
   console.log('TX:', contract.deployTransaction.hash)
 
   await contract.deployTransaction.wait(5)

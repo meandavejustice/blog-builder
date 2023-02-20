@@ -8,10 +8,8 @@
     "compile": "rm -rf typechain-types artifacts cache && hardhat compile && prettier -w typechain-types && hardhat flat > typechain-types/raw.sol && rm -rf ../src/ui/contracts/* && cp -R typechain-types/* ../src/ui/contracts && ts-node scripts/backupABI.ts && mkdir ../src/ui/contracts/versions && cp -R versions/* ../src/ui/contracts/versions",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network mumbai",
     "deploy:mainnet": "hardhat run scripts/deploy.ts --network matic",
-    "migrate:testnet": "hardhat run scripts/migrate.ts --network mumbai",
-    "migrate:mainnet": "hardhat run scripts/migrate.ts --network matic",
-    "fanCount:testnet": "hardhat run scripts/getFanCount.ts --network mumbai",
-    "fanCount:mainnet": "hardhat run scripts/getFanCount.ts --network matic",
+    "publish:testnet": "hardhat run scripts/publish.ts --network mumbai",
+    "publish:mainnet": "hardhat run scripts/publish.ts --network matic",
     "verify:testnet": "hardhat verify --network mumbai",
     "verify:mainnet": "hardhat verify --network matic",
     "lint": "prettier -w . && solhint --fix contracts/**/*.sol"

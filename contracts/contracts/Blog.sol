@@ -8,14 +8,8 @@ import {Math} from '@openzeppelin/contracts/utils/math/Math.sol';
 // how we store it internally
 struct Post {
   string url;
-  string[] tags;
   address author;
   uint published;
-}
-
-struct InputPost {
-  string url;
-  string[] tags;
 }
 
 contract Blog is AccessControlEnumerable {
@@ -33,12 +27,11 @@ contract Blog is AccessControlEnumerable {
   }
 
   // post write functions
-  function add(
-    InputPost memory _info
+  function publish(
+    string memory url
   ) public onlyRole(DEFAULT_ADMIN_ROLE) returns (uint listNumber) {
     Post memory newPost = Post({
-      url: _info.url,
-      tags: _info.tags,
+      url: url,
       author: _msgSender(),
       // solhint-disable-next-line not-rely-on-time
       published: block.timestamp

@@ -27,26 +27,14 @@ import type {
   PromiseOrValue
 } from '../common'
 
-export type InputPostStruct = {
-  url: PromiseOrValue<string>
-  tags: PromiseOrValue<string>[]
-}
-
-export type InputPostStructOutput = [string, string[]] & {
-  url: string
-  tags: string[]
-}
-
 export type PostStruct = {
   url: PromiseOrValue<string>
-  tags: PromiseOrValue<string>[]
   author: PromiseOrValue<string>
   published: PromiseOrValue<BigNumberish>
 }
 
-export type PostStructOutput = [string, string[], string, BigNumber] & {
+export type PostStructOutput = [string, string, BigNumber] & {
   url: string
-  tags: string[]
   author: string
   published: BigNumber
 }
@@ -54,7 +42,6 @@ export type PostStructOutput = [string, string[], string, BigNumber] & {
 export interface BlogInterface extends utils.Interface {
   functions: {
     'DEFAULT_ADMIN_ROLE()': FunctionFragment
-    'add((string,string[]))': FunctionFragment
     'addOwner(address)': FunctionFragment
     'getList()': FunctionFragment
     'getListLength()': FunctionFragment
@@ -69,6 +56,7 @@ export interface BlogInterface extends utils.Interface {
     'isOwner(address)': FunctionFragment
     'name()': FunctionFragment
     'publicKey()': FunctionFragment
+    'publish(string)': FunctionFragment
     'removeOwner(address)': FunctionFragment
     'renounceOwner()': FunctionFragment
     'renounceRole(bytes32,address)': FunctionFragment
@@ -81,7 +69,6 @@ export interface BlogInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | 'DEFAULT_ADMIN_ROLE'
-      | 'add'
       | 'addOwner'
       | 'getList'
       | 'getListLength'
@@ -96,6 +83,7 @@ export interface BlogInterface extends utils.Interface {
       | 'isOwner'
       | 'name'
       | 'publicKey'
+      | 'publish'
       | 'removeOwner'
       | 'renounceOwner'
       | 'renounceRole'
@@ -109,7 +97,6 @@ export interface BlogInterface extends utils.Interface {
     functionFragment: 'DEFAULT_ADMIN_ROLE',
     values?: undefined
   ): string
-  encodeFunctionData(functionFragment: 'add', values: [InputPostStruct]): string
   encodeFunctionData(
     functionFragment: 'addOwner',
     values: [PromiseOrValue<string>]
@@ -155,6 +142,10 @@ export interface BlogInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'name', values?: undefined): string
   encodeFunctionData(functionFragment: 'publicKey', values?: undefined): string
   encodeFunctionData(
+    functionFragment: 'publish',
+    values: [PromiseOrValue<string>]
+  ): string
+  encodeFunctionData(
     functionFragment: 'removeOwner',
     values: [PromiseOrValue<string>]
   ): string
@@ -184,7 +175,6 @@ export interface BlogInterface extends utils.Interface {
     functionFragment: 'DEFAULT_ADMIN_ROLE',
     data: BytesLike
   ): Result
-  decodeFunctionResult(functionFragment: 'add', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'addOwner', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'getList', data: BytesLike): Result
   decodeFunctionResult(
@@ -214,6 +204,7 @@ export interface BlogInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'isOwner', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'publicKey', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'publish', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'removeOwner', data: BytesLike): Result
   decodeFunctionResult(
     functionFragment: 'renounceOwner',
@@ -317,11 +308,6 @@ export interface Blog extends BaseContract {
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>
 
-    add(
-      _info: InputPostStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>
-
     addOwner(
       _address: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -381,6 +367,11 @@ export interface Blog extends BaseContract {
 
     publicKey(overrides?: CallOverrides): Promise<[string]>
 
+    publish(
+      url: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>
+
     removeOwner(
       _address: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -416,11 +407,6 @@ export interface Blog extends BaseContract {
   }
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>
-
-  add(
-    _info: InputPostStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>
 
   addOwner(
     _address: PromiseOrValue<string>,
@@ -481,6 +467,11 @@ export interface Blog extends BaseContract {
 
   publicKey(overrides?: CallOverrides): Promise<string>
 
+  publish(
+    url: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>
+
   removeOwner(
     _address: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -516,8 +507,6 @@ export interface Blog extends BaseContract {
 
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>
-
-    add(_info: InputPostStruct, overrides?: CallOverrides): Promise<BigNumber>
 
     addOwner(
       _address: PromiseOrValue<string>,
@@ -577,6 +566,11 @@ export interface Blog extends BaseContract {
     name(overrides?: CallOverrides): Promise<string>
 
     publicKey(overrides?: CallOverrides): Promise<string>
+
+    publish(
+      url: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>
 
     removeOwner(
       _address: PromiseOrValue<string>,
@@ -651,11 +645,6 @@ export interface Blog extends BaseContract {
   estimateGas: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>
 
-    add(
-      _info: InputPostStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>
-
     addOwner(
       _address: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -715,6 +704,11 @@ export interface Blog extends BaseContract {
 
     publicKey(overrides?: CallOverrides): Promise<BigNumber>
 
+    publish(
+      url: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>
+
     removeOwner(
       _address: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -751,11 +745,6 @@ export interface Blog extends BaseContract {
 
   populateTransaction: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>
-
-    add(
-      _info: InputPostStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>
 
     addOwner(
       _address: PromiseOrValue<string>,
@@ -815,6 +804,11 @@ export interface Blog extends BaseContract {
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>
 
     publicKey(overrides?: CallOverrides): Promise<PopulatedTransaction>
+
+    publish(
+      url: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>
 
     removeOwner(
       _address: PromiseOrValue<string>,
