@@ -1,0 +1,5 @@
+export const IPFS_IO = 'https://ipfs.io/ipfs'
+export const IPFS_GATEWAY = 'https://gateway.ipfs.io/ipfs'
+export const DWEB = 'https://dweb.link/ipfs'
+export const W3S = 'https://w3s.link/ipfs'
+export const NFTSTORAGE = 'https://nftstorage.link/ipfs'

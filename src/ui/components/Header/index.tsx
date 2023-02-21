@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 const Header = () => {
-  const { cid } = useParams()
+  const { idx } = useParams()
   const [theme, setTheme] = useState(localStorage.getItem('theme'))
   const toggleTheme = () => {
     if (theme === 'light') {
@@ -33,7 +33,7 @@ const Header = () => {
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center">
-        {cid ? (
+        {idx ? (
           <Link to="/" className="mr-4 flex items-center space-x-4">
             {/* <svg className="w-5 h-5 opacity-25" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.71,11.29l-11-11a1,1,0,0,0-1.42,0l-11,11a1,1,0,0,0-.21,1.09A1,1,0,0,0,1,13H2.25a.25.25,0,0,1,.25.25V23a1,1,0,0,0,1,1H9.25a.25.25,0,0,0,.25-.25V19a2.5,2.5,0,0,1,5,0v4.75a.25.25,0,0,0,.25.25H20.5a1,1,0,0,0,1-1V13.25a.25.25,0,0,1,.25-.25H23a1,1,0,0,0,.92-.62A1,1,0,0,0,23.71,11.29Z" fill="currentColor"></path></svg> */}
             <svg

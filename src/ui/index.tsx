@@ -16,7 +16,7 @@ const RootView = (
     <HashRouter>
       <Routes>
         <Route path="/" element={<HomeView />} />
-        <Route path="/post/:cid" element={<PostView />} />
+        <Route path="/post/:idx" element={<PostView />} />
       </Routes>
     </HashRouter>
   </StrictMode>
