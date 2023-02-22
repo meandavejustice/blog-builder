@@ -1,13 +1,14 @@
 import './index.css'
+import BlogPostSkeleton from '../../components/BlogPostSkeleton'
 import Header from '../../components/Header'
 import contract from '../../connections/contract'
 import { PostStructOutput } from '../../contracts/contracts/Blog'
-import { getMarkdown } from '../../utils'
+import { cleanMarkdownContent, getMarkdown } from '../../utils'
 import dayjs from 'dayjs'
-// import { posts } from '../../data/posts'
 import pRetry from 'p-retry'
 import React, { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import { useParams } from 'react-router-dom'
 
 const PostView = () => {
@@ -41,10 +42,9 @@ const PostView = () => {
   useMemo(() => {
     if (!post) return
     getMarkdown(post.url).then((res: any) => {
-      console.log(res)
       setFormattedPost({
         title: res.data.matter.title,
-        content: res,
+        content: cleanMarkdownContent(res),
         author: post.author,
         published: dayjs(post.published.toString()).toString()
       })
@@ -92,12 +92,12 @@ const PostView = () => {
                   {title}
                 </h2>
 
-                <p className="blog-entry-item__author flex items-center gap-2">
+                <p className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
                   {' '}
-                  <span className="w-12 h-12 rounded-full bg-gray-200"></span>
-                  <span>
+                  <span className="w-12 h-12 rounded-full bg-gray-200 flex-none"></span>
+                  <span className="overflow-auto w-full truncate">
                     <>
-                      {author}
+                      <span>{author}</span>
                       <br />
                       {published}
                     </>
@@ -105,17 +105,16 @@ const PostView = () => {
                 </p>
 
                 <div className="blog-entry-item__content pb-24 py-6">
-                  <div
-                    className="prose prose-lg dark:prose-invert blog-entry__content"
-                    dangerouslySetInnerHTML={{ __html: content }}
-                  ></div>
+                  <div className="prose prose-lg dark:prose-invert blog-entry__content">
+                    <ReactMarkdown>{content}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
               <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
-                <p className="blog-entry-item__author text-lg flex items-center gap-2">
+                <p className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
                   {' '}
-                  <span className="w-16 h-16 rounded-full bg-gray-200"></span>
-                  {author}
+                  <span className="w-16 h-16 rounded-full bg-gray-200 flex-none"></span>
+                  <span className="truncate">{author}</span>
                 </p>
                 <h6 className="uppercase text-xs pt-4 font-bold">
                   Additional Info
@@ -146,10 +145,12 @@ const PostView = () => {
       </>
     )
   } else {
-    return (
+    return loaded ? (
       <div className="post-view container post-not-found">
         There is no post here.
       </div>
+    ) : (
+      <BlogPostSkeleton />
     )
   }
 }

@@ -1,9 +1,9 @@
 import fm from '../plugins/frontmatter'
 import { base32cid, cid } from 'is-ipfs'
-import remarkFrontmatter from 'remark-frontmatter'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
+import { VFile } from 'vfile-matter/lib'
 
 export type Node = {
   host: string
@@ -14,18 +14,22 @@ export type Node = {
 export const getMarkdown = async (url: string) => {
   const res = await fetch(transformForShare(url))
   const txt = await res.text()
-  const formatPost = await parsePost(txt)
+  const formatPost = await parsePostMarkdown(txt)
   return formatPost
 }
 
-export const parsePost = (markdown: string) => {
+export const parsePostMarkdown = (markdown: string) => {
   const frontMatter = unified()
     .use(remarkParse)
     .use(remarkStringify)
-    .use(remarkFrontmatter)
     .use(fm)
     .process(markdown)
   return frontMatter.then((res) => res)
+}
+
+export const cleanMarkdownContent = (markdown: VFile) => {
+  const YAMLFrontMatter = /---|\*\*\*(.*)---|\*\*\*/gimsu
+  return markdown.toString().replace(YAMLFrontMatter, '')
 }
 
 export const transform = (url: string, node: Node) => {

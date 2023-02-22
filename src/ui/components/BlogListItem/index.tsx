@@ -1,14 +1,9 @@
 import './index.css'
-import fm from '../../../plugins/frontmatter'
 import { PostStructOutput } from '../../contracts/contracts/Blog'
-import { transformForShare } from '../../utils'
+import { getMarkdown } from '../../utils'
 import dayjs from 'dayjs'
 import React, { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkParse from 'remark-parse'
-import remarkStringify from 'remark-stringify'
-import { unified } from 'unified'
 
 const BlogListItem = ({
   post,
@@ -19,34 +14,18 @@ const BlogListItem = ({
 }) => {
   const [formattedPost, setFormattedPost] = useState({} as any)
 
-  const parsePost = (markdown: string) => {
-    const frontMatter = unified()
-      .use(remarkParse)
-      .use(remarkStringify)
-      .use(remarkFrontmatter)
-      .use(fm)
-      .process(markdown)
-    frontMatter.then((res: any) => {
+  useMemo(() => {
+    if (!post) return
+    getMarkdown(post.url).then((res: any) => {
       setFormattedPost({
         title: res.data.matter.title,
-        excerpt: res.data.matter.excerpt,
         thumbnail: res.data.matter.thumbnail,
-        content: res,
+        excerpt: res.data.matter.excerpt,
         author: post.author,
         published: dayjs(post.published.toString()).toString()
       })
     })
-  }
-
-  useMemo(() => {
-    const getMarkdown = async () => {
-      const res = await fetch(transformForShare(post.url))
-      const txt = await res.text()
-      const formatPost = parsePost(txt)
-      setFormattedPost(formatPost)
-    }
-    getMarkdown()
-  }, [post.url])
+  }, [post])
 
   if (!formattedPost) return <></>
 
