@@ -6,10 +6,10 @@
   display: grid;
   grid-gap: var(--space-xl);
   grid-template-areas: 'content aside';
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: auto 320px;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 980px) {
   .blog-layout {
     display: block;
   }

@@ -1,10 +1,15 @@
 import './index.css'
-import React, { useEffect, useState } from 'react'
+import contract from '../../connections/contract'
+import pRetry from 'p-retry'
+import React, { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 const Header = () => {
   const { idx } = useParams()
   const [theme, setTheme] = useState(localStorage.getItem('theme'))
+  const [error, setError] = useState('')
+  const [contractName, setContractName] = useState('')
+
   const toggleTheme = () => {
     if (theme === 'light') {
       setTheme('dark')
@@ -15,7 +20,28 @@ const Header = () => {
     }
   }
 
-  useEffect(() => {
+  const getNameOfContract = async () => {
+    const response = await contract.name()
+    return response
+  }
+
+  const getContractName = async () => {
+    try {
+      const p = await pRetry(getNameOfContract, { retries: 5 })
+      if (p) {
+        console.log(p)
+        setContractName(p)
+      }
+    } catch {
+      setError('failed to get blog title')
+    }
+  }
+
+  useMemo(() => {
+    getContractName()
+  }, [])
+
+  useMemo(() => {
     if (theme) {
       document.body.className = theme
     } else {
@@ -35,7 +61,6 @@ const Header = () => {
       <div className="flex items-center">
         {idx ? (
           <Link to="/" className="mr-4 flex items-center space-x-4">
-            {/* <svg className="w-5 h-5 opacity-25" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.71,11.29l-11-11a1,1,0,0,0-1.42,0l-11,11a1,1,0,0,0-.21,1.09A1,1,0,0,0,1,13H2.25a.25.25,0,0,1,.25.25V23a1,1,0,0,0,1,1H9.25a.25.25,0,0,0,.25-.25V19a2.5,2.5,0,0,1,5,0v4.75a.25.25,0,0,0,.25.25H20.5a1,1,0,0,0,1-1V13.25a.25.25,0,0,1,.25-.25H23a1,1,0,0,0,.92-.62A1,1,0,0,0,23.71,11.29Z" fill="currentColor"></path></svg> */}
             <svg
               className="w-4 h-4"
               xmlns="http://www.w3.org/2000/svg"
@@ -46,11 +71,10 @@ const Header = () => {
                 fill="currentColor"
               ></path>
             </svg>
-            {/* <span>Back to Home</span>   */}
-            <h1 className="blog-title">Hello, world!</h1>
+            <h1 className="blog-title">{contractName}</h1>
           </Link>
         ) : (
-          <h1 className="blog-title">Hello, world!</h1>
+          <h1 className="blog-title">{contractName}</h1>
         )}
       </div>
       <div className="space-x-4 flex">

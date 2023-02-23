@@ -1,9 +1,14 @@
 import './index.css'
 import BlogPostSkeleton from '../../components/BlogPostSkeleton'
 import Header from '../../components/Header'
+import Truncate from '../../components/Truncate'
 import contract from '../../connections/contract'
 import { PostStructOutput } from '../../contracts/contracts/Blog'
-import { cleanMarkdownContent, getMarkdown } from '../../utils'
+import {
+  cleanMarkdownContent,
+  getMarkdown,
+  transformForShare
+} from '../../utils'
 import dayjs from 'dayjs'
 import pRetry from 'p-retry'
 import React, { useMemo, useState } from 'react'
@@ -15,6 +20,7 @@ const PostView = () => {
   const { idx } = useParams()
   const [error, setError] = useState('')
   const [loaded, setLoaded] = useState(false)
+  const [contractName, setContractName] = useState()
   const [post, setPost] = useState<PostStructOutput>()
   const [formattedPost, setFormattedPost] = useState({} as any)
 
@@ -123,10 +129,13 @@ const PostView = () => {
                   <span>Published:</span> {published}
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                  <span>CID:</span> bafybeif5tduva..unav2okcrhte5cm
+                  <span className="pr-4 ">CID:</span>{' '}
+                  <span className="block overflow-hidden">
+                    <Truncate text={post.url} cid={true} />
+                  </span>
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                  <span>Contract Address:</span> 0x2ada3ax04ad92hdaca2541a17b
+                  <span>Contract:</span> <Truncate text={contract.address} />
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
                   <span>Token Standard:</span> ERC21
@@ -134,7 +143,21 @@ const PostView = () => {
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
                   <span>View On:</span>{' '}
                   <span>
-                    <a href="#">dweb.link</a> | <a href="#">ipfs.io</a>
+                    <a
+                      href={transformForShare(post.url, 'dweb.link')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      dweb.link
+                    </a>{' '}
+                    |{' '}
+                    <a
+                      href={transformForShare(post.url, 'w3s.link')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      w3s.link
+                    </a>
                   </span>
                 </p>
                 <button className="btn mt-10">Pin to IPFS</button>

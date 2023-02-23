@@ -87,6 +87,11 @@ export const open = (url: string, node?: Node) => {
   if (transformed) window.open(transformed)
 }
 
+export const getHostname = (url: string) => {
+  const { hostname } = new URL(url)
+  return hostname
+}
+
 // presuppose that dweb.link is our best bet, but include local so it health checks for it on startup
 export const defaultNodes: Node[] = [
   { host: 'dweb.link', remote: true },
