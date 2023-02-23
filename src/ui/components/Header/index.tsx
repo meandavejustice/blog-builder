@@ -3,12 +3,13 @@ import contract from '../../connections/contract'
 import pRetry from 'p-retry'
 import React, { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import useSWR, { useSWRConfig } from 'swr'
 
 const Header = () => {
   const { idx } = useParams()
   const [theme, setTheme] = useState(localStorage.getItem('theme'))
   const [error, setError] = useState('')
-  const [contractName, setContractName] = useState('')
+  const { cache } = useSWRConfig()
 
   const toggleTheme = () => {
     if (theme === 'light') {
@@ -28,18 +29,27 @@ const Header = () => {
   const getContractName = async () => {
     try {
       const p = await pRetry(getNameOfContract, { retries: 5 })
-      if (p) {
-        console.log(p)
-        setContractName(p)
-      }
+      return p
     } catch {
       setError('failed to get blog title')
     }
   }
 
-  useMemo(() => {
-    getContractName()
-  }, [])
+  const cacheData = cache.get('contract:name')
+  const freshData = useSWR(
+    () => (!cacheData ? 'contract:name' : null),
+    getContractName,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  )
+  const {
+    data: contractName,
+    isLoading,
+    isValidating
+  } = cacheData ? cacheData : freshData
 
   useMemo(() => {
     if (theme) {
@@ -77,7 +87,7 @@ const Header = () => {
           <h1 className="blog-title">{contractName}</h1>
         )}
       </div>
-      <div className="space-x-4 flex">
+      <div className="space-x-8 flex">
         <a href="" className="w-8 h-8">
           <svg
             className="w-8 h-8"
@@ -97,7 +107,7 @@ const Header = () => {
           id="theme-toggle"
           type="button"
           onClick={() => toggleTheme()}
-          className="w-8- h-8"
+          className="w-8 h-8"
         >
           <svg
             className="w-8 h-8"

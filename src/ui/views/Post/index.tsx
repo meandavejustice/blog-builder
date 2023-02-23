@@ -3,99 +3,88 @@ import BlogPostSkeleton from '../../components/BlogPostSkeleton'
 import Header from '../../components/Header'
 import Truncate from '../../components/Truncate'
 import contract from '../../connections/contract'
-import { PostStructOutput } from '../../contracts/contracts/Blog'
 import {
   cleanMarkdownContent,
   getMarkdown,
+  parseDateFromBigInt,
   transformForShare
 } from '../../utils'
-import dayjs from 'dayjs'
 import pRetry from 'p-retry'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import { useParams } from 'react-router-dom'
+import useSWR, { useSWRConfig } from 'swr'
 
 const PostView = () => {
   const { idx } = useParams()
   const [error, setError] = useState('')
-  const [loaded, setLoaded] = useState(false)
-  const [contractName, setContractName] = useState()
-  const [post, setPost] = useState<PostStructOutput>()
-  const [formattedPost, setFormattedPost] = useState({} as any)
+  const { cache } = useSWRConfig()
 
   const getPostFromContract = async () => {
     if (!idx) return
     const response = await contract.getPost(idx)
-    return response
+    const markdown = await getMarkdown(response.url)
+    const postData = await { post: response, md: markdown as any }
+    return postData
+  }
+  getPostFromContract()
+
+  const getPost = async () => {
+    try {
+      const p = await pRetry(getPostFromContract, { retries: 5 })
+      return p
+    } catch {
+      setError('Something went wrong.')
+    }
   }
 
-  useMemo(() => {
-    const getPost = async () => {
-      try {
-        const p = await pRetry(getPostFromContract, { retries: 5 })
-        if (p) {
-          setPost(p)
-          setLoaded(true)
-        }
-      } catch {
-        setError('Something went wrong.')
-      }
+  const cacheData = cache.get('contract:post')
+  const freshData = useSWR(
+    () => (!cacheData ? 'contract:post' : null),
+    getPost,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
     }
-    getPost()
-  }, [idx])
+  )
+  const { data, isLoading, isValidating } = cacheData ? cacheData : freshData
 
-  useMemo(() => {
-    if (!post) return
-    getMarkdown(post.url).then((res: any) => {
-      setFormattedPost({
-        title: res.data.matter.title,
-        content: cleanMarkdownContent(res),
-        author: post.author,
-        published: dayjs(post.published.toString()).toString()
-      })
-    })
-  }, [post])
+  return (
+    <>
+      <Helmet>
+        <title>Pets - Products</title>
+        <meta
+          name="description"
+          content="Find all the best quality products your pet may need"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@user" />
+        <meta name="twitter:creator" content="@user" />
+        <meta name="twitter:title" content="Pets - Products" />
+        <meta name="twitter:description" content="Best Products for your pet" />
+        <meta name="twitter:image" content="url_to_image" />
+        <meta property="og:title" content="Pets - Products" />
+        <meta property="og:description" content="Best Products for your pet" />
+        <meta property="og:image" content="url_to_image" />
+        <meta property="og:url" content="pets.abc" />
+        <meta property="og:site_name" content="Pets - Products" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="article" />
+        <meta property="fb:app_id" content="ID_APP_FACEBOOK" />
+      </Helmet>
+      <div className="post-view view ">
+        <div className="container min-h-screen">
+          <Header />
 
-  if (post) {
-    const { title, published, content, author } = formattedPost
-
-    return (
-      <>
-        <Helmet>
-          <title>Pets - Products</title>
-          <meta
-            name="description"
-            content="Find all the best quality products your pet may need"
-          />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:site" content="@user" />
-          <meta name="twitter:creator" content="@user" />
-          <meta name="twitter:title" content="Pets - Products" />
-          <meta
-            name="twitter:description"
-            content="Best Products for your pet"
-          />
-          <meta name="twitter:image" content="url_to_image" />
-          <meta property="og:title" content="Pets - Products" />
-          <meta
-            property="og:description"
-            content="Best Products for your pet"
-          />
-          <meta property="og:image" content="url_to_image" />
-          <meta property="og:url" content="pets.abc" />
-          <meta property="og:site_name" content="Pets - Products" />
-          <meta property="og:locale" content="en_US" />
-          <meta property="og:type" content="article" />
-          <meta property="fb:app_id" content="ID_APP_FACEBOOK" />
-        </Helmet>
-        <div className="post-view view ">
-          <div className="container min-h-screen">
-            <Header />
+          {isLoading ? (
+            <BlogPostSkeleton />
+          ) : (
             <div className="blog-layout">
               <div className="blog-main">
                 <h2 className="blog-entry__title font-bold max-w-5xl mb-4">
-                  {title}
+                  {data.md.data.matter.title || ''}
                 </h2>
 
                 <p className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
@@ -103,16 +92,27 @@ const PostView = () => {
                   <span className="w-12 h-12 rounded-full bg-gray-200 flex-none"></span>
                   <span className="overflow-auto w-full truncate">
                     <>
-                      <span>{author}</span>
+                      <span>{data.post[1]}</span>
                       <br />
-                      {published}
+                      {parseDateFromBigInt(data.post[2])}
                     </>
                   </span>
                 </p>
 
                 <div className="blog-entry-item__content pb-24 py-6">
                   <div className="prose prose-lg dark:prose-invert blog-entry__content">
-                    <ReactMarkdown>{content}</ReactMarkdown>
+                    {!isValidating ? (
+                      <ReactMarkdown>
+                        {cleanMarkdownContent(String(data.md.value))}
+                      </ReactMarkdown>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="blog-list-item__excerpt w-full h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-3/4 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-3/4 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-1/2 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -120,18 +120,20 @@ const PostView = () => {
                 <p className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
                   {' '}
                   <span className="w-16 h-16 rounded-full bg-gray-200 flex-none"></span>
-                  <span className="truncate">{author}</span>
+                  <span className="truncate">{data.post[1]}</span>
                 </p>
                 <h6 className="uppercase text-xs pt-4 font-bold">
                   Additional Info
                 </h6>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                  <span>Published:</span> {published}
+                  <>
+                    <span>Published:</span> {parseDateFromBigInt(data.post[2])}
+                  </>
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
                   <span className="pr-4 ">CID:</span>{' '}
                   <span className="block overflow-hidden">
-                    <Truncate text={post.url} cid={true} />
+                    <Truncate text={data.post[0]} cid={true} />
                   </span>
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
@@ -144,7 +146,7 @@ const PostView = () => {
                   <span>View On:</span>{' '}
                   <span>
                     <a
-                      href={transformForShare(post.url, 'dweb.link')}
+                      href={transformForShare(data.post[0], 'dweb.link')}
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -152,7 +154,7 @@ const PostView = () => {
                     </a>{' '}
                     |{' '}
                     <a
-                      href={transformForShare(post.url, 'w3s.link')}
+                      href={transformForShare(data.post[0], 'w3s.link')}
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -163,19 +165,11 @@ const PostView = () => {
                 <button className="btn mt-10">Pin to IPFS</button>
               </aside>
             </div>
-          </div>
+          )}
         </div>
-      </>
-    )
-  } else {
-    return loaded ? (
-      <div className="post-view container post-not-found">
-        There is no post here.
       </div>
-    ) : (
-      <BlogPostSkeleton />
-    )
-  }
+    </>
+  )
 }
 
 export default PostView

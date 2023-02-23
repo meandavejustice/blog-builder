@@ -1,9 +1,10 @@
 import fm from '../plugins/frontmatter'
+import dayjs from 'dayjs'
+import { BigNumber } from 'ethers'
 import { base32cid, cid } from 'is-ipfs'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
-import { VFile } from 'vfile-matter/lib'
 
 export type Node = {
   host: string
@@ -12,7 +13,8 @@ export type Node = {
 }
 
 export const getMarkdown = async (url: string) => {
-  const res = await fetch(transformForShare(url))
+  if (!url) return
+  const res = await fetch(transformForShare(url) as string)
   const txt = await res.text()
   const formatPost = await parsePostMarkdown(txt)
   return formatPost
@@ -27,12 +29,19 @@ export const parsePostMarkdown = (markdown: string) => {
   return frontMatter.then((res) => res)
 }
 
-export const cleanMarkdownContent = (markdown: VFile) => {
+export const parseDateFromBigInt = (bigInt: bigint) => {
+  return dayjs(
+    new Date(parseInt(BigNumber.from(bigInt).toString()) * 1000)
+  ).format('MMMM DD, YYYY')
+}
+
+export const cleanMarkdownContent = (markdown: string) => {
   const YAMLFrontMatter = /---|\*\*\*(.*)---|\*\*\*/gimsu
   return markdown.toString().replace(YAMLFrontMatter, '')
 }
 
 export const transform = (url: string, node: Node) => {
+  if (!url) return
   // support opening just a CID w/ no protocol
   if (cid(url) || cid(url.split('/')[0].split('?')[0])) url = `ipfs://${url}`
 
@@ -88,6 +97,7 @@ export const open = (url: string, node?: Node) => {
 }
 
 export const getHostname = (url: string) => {
+  if (!url) return
   const { hostname } = new URL(url)
   return hostname
 }
