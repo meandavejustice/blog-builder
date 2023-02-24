@@ -1,6 +1,7 @@
 import 'normalize.css'
 import './index.css'
 import HomeView from './views/Home'
+import NotFound from './views/NotFound'
 import PostView from './views/Post'
 import React from 'react'
 import { StrictMode } from 'react'
@@ -33,6 +34,7 @@ const RootView = (
         <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="/post/:idx" element={<PostView />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
     </SWRConfig>

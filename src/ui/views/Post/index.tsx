@@ -9,6 +9,7 @@ import {
   parseDateFromBigInt,
   transformForShare
 } from '../../utils'
+import NotFound from '../NotFound'
 import pRetry from 'p-retry'
 import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -19,14 +20,19 @@ import useSWR, { useSWRConfig } from 'swr'
 const PostView = () => {
   const { idx } = useParams()
   const [error, setError] = useState('')
+  const [postNotFound, setPostNotFound] = useState(false)
   const { cache } = useSWRConfig()
 
   const getPostFromContract = async () => {
     if (!idx) return
-    const response = await contract.getPost(idx)
-    const markdown = await getMarkdown(response.url)
-    const postData = await { post: response, md: markdown as any }
-    return postData
+    try {
+      const response = await contract.getPost(idx)
+      const markdown = await getMarkdown(response.url)
+      const postData = await { post: response, md: markdown as any }
+      return postData
+    } catch (error) {
+      setPostNotFound(true)
+    }
   }
   getPostFromContract()
 
@@ -44,35 +50,28 @@ const PostView = () => {
     () => (!cacheData ? 'contract:post' : null),
     getPost,
     {
-      revalidateIfStale: false,
+      revalidateIfStale: true,
       revalidateOnFocus: false,
       revalidateOnReconnect: false
     }
   )
   const { data, isLoading, isValidating } = cacheData ? cacheData : freshData
 
+  if (postNotFound) return <NotFound />
+
   return (
     <>
       <Helmet>
-        <title>Pets - Products</title>
+        <meta name="twitter:title" content={data.md.data.matter.title} />
         <meta
-          name="description"
-          content="Find all the best quality products your pet may need"
+          name="twitter:description"
+          content={data.md.data.matter.excerpt}
         />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@user" />
-        <meta name="twitter:creator" content="@user" />
-        <meta name="twitter:title" content="Pets - Products" />
-        <meta name="twitter:description" content="Best Products for your pet" />
-        <meta name="twitter:image" content="url_to_image" />
-        <meta property="og:title" content="Pets - Products" />
-        <meta property="og:description" content="Best Products for your pet" />
-        <meta property="og:image" content="url_to_image" />
-        <meta property="og:url" content="pets.abc" />
-        <meta property="og:site_name" content="Pets - Products" />
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:type" content="article" />
-        <meta property="fb:app_id" content="ID_APP_FACEBOOK" />
+        <meta name="twitter:image" content={data.md.data.matter.thumbnail} />
+        <meta property="og:title" content={data.md.data.matter.title} />
+        <meta property="og:description" content={data.md.data.matter.excerpt} />
+        <meta property="og:image" content={data.md.data.matter.thumbnail} />
+        <meta property="og:url" content={`${window.location.href}`} />
       </Helmet>
       <div className="post-view view ">
         <div className="container min-h-screen">
