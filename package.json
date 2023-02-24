@@ -55,14 +55,17 @@
     ]
   },
   "dependencies": {
+    "@ensdomains/ens-avatar": "^0.2.1",
     "@sinclair/typebox": "^0.25.21",
     "conf": "^10.0.0",
     "dayjs": "^1.11.7",
+    "ethereum-identicon": "^0.0.4",
     "ethers": "^5.6.8",
     "is-ipfs": "^8.0.1",
     "meow": "^11.0.0",
     "p-retry": "^5.1.2",
     "react-helmet": "^6.1.0",
+    "react-jazzicon": "^1.0.4",
     "react-markdown": "^8.0.5",
     "react-slugify": "^3.0.2",
     "rehype-stringify": "^9.0.3",

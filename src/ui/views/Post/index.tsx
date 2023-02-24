@@ -1,4 +1,5 @@
 import './index.css'
+import Avatar from '../../../ui/components/Avatar'
 import BlogPostSkeleton from '../../components/BlogPostSkeleton'
 import Header from '../../components/Header'
 import Truncate from '../../components/Truncate'
@@ -88,8 +89,10 @@ const PostView = () => {
 
                 <p className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
                   {' '}
-                  <span className="w-12 h-12 rounded-full bg-gray-200 flex-none"></span>
-                  <span className="overflow-auto w-full truncate">
+                  <span className="w-12 h-12 rounded-full bg-gray-200 flex-none">
+                    <Avatar authorAddress={data.post[1]} />
+                  </span>
+                  <span className="overflow-auto w-full truncate w-12">
                     <>
                       <span>{data.post[1]}</span>
                       <br />
@@ -118,7 +121,9 @@ const PostView = () => {
               <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
                 <p className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
                   {' '}
-                  <span className="w-16 h-16 rounded-full bg-gray-200 flex-none"></span>
+                  <span className="w-16 h-16 rounded-full bg-gray-200 flex-none">
+                    <Avatar authorAddress={data.post[1]} size={64} />
+                  </span>
                   <span className="truncate">{data.post[1]}</span>
                 </p>
                 <h6 className="uppercase text-xs pt-4 font-bold">
@@ -136,10 +141,17 @@ const PostView = () => {
                   </span>
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                  <span>Contract:</span> <Truncate text={contract.address} />
+                  <span>Contract:</span>{' '}
+                  <a
+                    href={`https://mumbai.polygonscan.com/address/${contract.address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Truncate text={contract.address} />
+                  </a>
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                  <span>Token Standard:</span> ERC21
+                  <span>Token Standard:</span> ERC165
                 </p>
                 <p className="blog-entry-meta flex justify-between text-sm mt-2">
                   <span>View On:</span>{' '}

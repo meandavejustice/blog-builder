@@ -1,6 +1,7 @@
 import './index.css'
 import contract from '../../../ui/connections/contract'
 import { getMarkdown, parseDateFromBigInt } from '../../utils'
+import Avatar from '../Avatar'
 import pRetry from 'p-retry'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -56,8 +57,10 @@ const BlogListItem = ({ post, idx }: { post: any; idx: number }) => {
           </Link>
         </h3>
         <p className="blog-list-item__author mb-4 flex items-center gap-2">
-          <span className="w-8 h-8 rounded-full bg-gray-200"></span>
-          {postData[1]}
+          <span className="w-8 h-8 rounded-full bg-gray-200">
+            <Avatar authorAddress={data.post[1]} size={32} />
+          </span>
+          <span className="truncate">{data.post[1]}</span>
         </p>
         <div className="blog-list-item__excerpt">{excerpt}</div>
       </div>
