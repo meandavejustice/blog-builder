@@ -6,11 +6,10 @@ import Header from '../../components/Header'
 import contract from '../../connections/contract'
 import pRetry from 'p-retry'
 import React, { useState } from 'react'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWRImmutable from 'swr/immutable'
 
 const Home = () => {
   const [error, setError] = useState('')
-  const { cache } = useSWRConfig()
 
   const getPostList = async () => {
     const response = await contract.getList()
@@ -29,24 +28,18 @@ const Home = () => {
   const getList = async () => {
     try {
       const res = await pRetry(getPostList, { retries: 5 })
+      if (!res) {
+        throw new Error("Couldn't fetch getPostList")
+      }
       return res
-    } catch {
-      setError('Something went wrong.')
+    } catch (error) {
+      console.log(error)
     }
   }
 
-  const cacheData = cache.get('contract:allPosts')
-  const freshData = useSWR(
-    () => (!cacheData ? 'contract:allPosts' : null),
-    getList,
-    {
-      revalidateIfStale: true,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  )
+  const swrData = useSWRImmutable('contract:allPosts', getList)
 
-  const { data, isLoading, isValidating } = cacheData ? cacheData : freshData
+  const { data, isLoading, isValidating } = swrData
 
   return (
     <div className="home-view view">

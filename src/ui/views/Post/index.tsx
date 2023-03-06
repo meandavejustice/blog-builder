@@ -16,13 +16,11 @@ import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import { useParams } from 'react-router-dom'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWRImmutable from 'swr/immutable'
 
 const PostView = () => {
   const { idx } = useParams()
-  const [error, setError] = useState('')
   const [postNotFound, setPostNotFound] = useState(false)
-  const { cache } = useSWRConfig()
 
   const getPostFromContract = async () => {
     if (!idx) return
@@ -35,32 +33,25 @@ const PostView = () => {
       setPostNotFound(true)
     }
   }
-  getPostFromContract()
 
   const getPost = async () => {
     try {
       const p = await pRetry(getPostFromContract, { retries: 5 })
+      if (!p) {
+        throw new Error("Couldn't fetch getPost")
+      }
       return p
-    } catch {
-      setError('Something went wrong.')
+    } catch (error) {
+      console.error(error)
     }
   }
 
-  const cacheData = cache.get('contract:post')
-  const freshData = useSWR(
-    () => (!cacheData ? 'contract:post' : null),
-    getPost,
-    {
-      revalidateIfStale: true,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  )
-  const { data, isLoading, isValidating } = cacheData ? cacheData : freshData
+  const swrData = useSWRImmutable('contract:post', getPost)
+  const { data, isLoading, isValidating } = swrData
 
   if (postNotFound) return <NotFound />
 
-  return (
+  return !isLoading && data ? (
     <>
       <Helmet>
         <meta name="twitter:title" content={data.md.data.matter.title} />
@@ -87,7 +78,7 @@ const PostView = () => {
                   {data.md.data.matter.title || ''}
                 </h2>
 
-                <p className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
+                <div className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
                   {' '}
                   <span className="w-12 h-12 rounded-full bg-gray-200 flex-none">
                     <Avatar authorAddress={data.post[1]} />
@@ -99,7 +90,7 @@ const PostView = () => {
                       {parseDateFromBigInt(data.post[2])}
                     </>
                   </span>
-                </p>
+                </div>
 
                 <div className="blog-entry-item__content pb-24 py-6">
                   <div className="prose prose-lg dark:prose-invert blog-entry__content">
@@ -119,13 +110,13 @@ const PostView = () => {
                 </div>
               </div>
               <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
-                <p className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
+                <div className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
                   {' '}
                   <span className="w-16 h-16 rounded-full bg-gray-200 flex-none">
                     <Avatar authorAddress={data.post[1]} size={64} />
                   </span>
                   <span className="truncate">{data.post[1]}</span>
-                </p>
+                </div>
                 <h6 className="uppercase text-xs pt-4 font-bold">
                   Additional Info
                 </h6>
@@ -180,6 +171,8 @@ const PostView = () => {
         </div>
       </div>
     </>
+  ) : (
+    <BlogPostSkeleton />
   )
 }
 
