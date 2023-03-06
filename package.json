@@ -64,6 +64,7 @@
     "is-ipfs": "^8.0.1",
     "meow": "^11.0.0",
     "p-retry": "^5.1.2",
+    "react-feather": "^2.0.10",
     "react-helmet": "^6.1.0",
     "react-jazzicon": "^1.0.4",
     "react-markdown": "^8.0.5",
