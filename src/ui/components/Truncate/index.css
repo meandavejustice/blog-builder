@@ -1,0 +1,19 @@
+.truncate-middle {
+  display: flex;
+  font-family: Courier;
+  max-width: 220px;
+  overflow: hidden;
+}
+.truncate-middle span:first-child {
+  flex: 1 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+.truncate-middle span:last-child {
+  flex: 0 1 auto;
+  overflow: hidden;
+  direction: rtl;
+  text-overflow: ellipsis;
+  white-space: pre;
+}

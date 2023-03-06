@@ -46,22 +46,11 @@ body {
   font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue',
     Helvetica, Arial, 'Lucida Grande', sans-serif;
   font-weight: 300;
-  background-color: #f7f7f7;
   line-height: 1.65;
 }
 
-body:before {
-  content: '';
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  top: 0;
-  z-index: -1;
-  @apply bg-teal-400;
-}
-
 .view {
-  @apply bg-teal-50 text-gray-900 dark:bg-teal-900 dark:text-white mt-4;
+  @apply bg-teal-50 text-gray-900 dark:bg-teal-900 dark:text-white border-t-8 border-teal-500;
 }
 
 h1 {

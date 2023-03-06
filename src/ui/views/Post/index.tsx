@@ -1,137 +1,179 @@
 import './index.css'
-import fm from '../../../plugins/frontmatter'
+import Avatar from '../../../ui/components/Avatar'
+import BlogPostSkeleton from '../../components/BlogPostSkeleton'
 import Header from '../../components/Header'
-import { posts } from '../../data/posts'
-import React, { useMemo, useState } from 'react'
+import Truncate from '../../components/Truncate'
+import contract from '../../connections/contract'
+import {
+  cleanMarkdownContent,
+  getMarkdown,
+  parseDateFromBigInt,
+  transformForShare
+} from '../../utils'
+import NotFound from '../NotFound'
+import pRetry from 'p-retry'
+import React, { useState } from 'react'
+import { Helmet } from 'react-helmet'
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import { useParams } from 'react-router-dom'
-import rehypeStringify from 'rehype-stringify'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkGfm from 'remark-gfm'
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import remarkStringify from 'remark-stringify'
-import { unified } from 'unified'
+import useSWRImmutable from 'swr/immutable'
 
 const PostView = () => {
-  const { cid } = useParams()
-  const [markd, setMarkd] = useState('')
-  const [title, setTitle] = useState('')
-  const [, setExcerpt] = useState('')
-  const [content, setContent] = useState('')
-  const post = posts.find((post) => post.cid === cid)
+  const { idx } = useParams()
+  const [postNotFound, setPostNotFound] = useState(false)
 
-  // fetch the markdown
-  useMemo(() => {
-    if (!post) return
-    const getMarkdown = async () => {
-      fetch(post.content)
-        .then((response) => response.text())
-        .then((result) => {
-          setMarkd(result)
-        })
+  const getPostFromContract = async () => {
+    if (!idx) return
+    try {
+      const response = await contract.getPost(idx)
+      const markdown = await getMarkdown(response.url)
+      const postData = await { post: response, md: markdown as any }
+      return postData
+    } catch (error) {
+      setPostNotFound(true)
     }
-    getMarkdown()
-  }, [post])
+  }
 
-  // get parsed markdown content
-  useMemo(() => {
-    if (!markd) return
-    const md = unified()
-      .use(remarkParse)
-      .use(remarkFrontmatter)
-      .use(remarkRehype)
-      .use(remarkGfm)
-      .use(rehypeStringify)
-      .process(markd)
-    md.then((res) => {
-      console.log(res.value)
-      if (res.value) setContent(res.value as any)
-    })
-  }, [markd])
+  const getPost = async () => {
+    try {
+      const p = await pRetry(getPostFromContract, { retries: 5 })
+      if (!p) {
+        throw new Error("Couldn't fetch getPost")
+      }
+      return p
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
-  // get metadata/frontmatter
-  useMemo(() => {
-    if (!markd) return
-    const frontMatter = unified()
-      .use(remarkParse)
-      .use(remarkStringify)
-      .use(remarkFrontmatter)
-      .use(fm)
-      .process(markd)
-    frontMatter.then((res: any) => {
-      if (res.data.matter.title) setTitle(res.data.matter.title)
-      if (res.data.matter.excerpt) setExcerpt(res.data.matter.excerpt)
-    })
-  }, [markd])
+  const swrData = useSWRImmutable('contract:post', getPost)
+  const { data, isLoading, isValidating } = swrData
 
-  if (post) {
-    return (
+  if (postNotFound) return <NotFound />
+
+  return !isLoading && data ? (
+    <>
+      <Helmet>
+        <meta name="twitter:title" content={data.md.data.matter.title} />
+        <meta
+          name="twitter:description"
+          content={data.md.data.matter.excerpt}
+        />
+        <meta name="twitter:image" content={data.md.data.matter.thumbnail} />
+        <meta property="og:title" content={data.md.data.matter.title} />
+        <meta property="og:description" content={data.md.data.matter.excerpt} />
+        <meta property="og:image" content={data.md.data.matter.thumbnail} />
+        <meta property="og:url" content={`${window.location.href}`} />
+      </Helmet>
       <div className="post-view view ">
         <div className="container min-h-screen">
           <Header />
-          <div className="blog-layout">
-            <div className="blog-main">
-              <h2 className="blog-entry__title font-bold max-w-5xl mb-4">
-                {title}
-              </h2>
 
-              <p className="blog-entry-item__author flex items-center gap-2">
-                {' '}
-                <span className="w-12 h-12 rounded-full bg-gray-200"></span>
-                <span>
-                  {post.author}
-                  <br />
-                  {post.published}
-                </span>
-              </p>
+          {isLoading ? (
+            <BlogPostSkeleton />
+          ) : (
+            <div className="blog-layout">
+              <div className="blog-main">
+                <h2 className="blog-entry__title font-bold max-w-5xl mb-4">
+                  {data.md.data.matter.title || ''}
+                </h2>
 
-              <div className="blog-entry-item__content pb-24 py-6">
-                <div
-                  className="prose prose-lg dark:prose-invert blog-entry__content"
-                  dangerouslySetInnerHTML={{ __html: content }}
-                ></div>
+                <div className="blog-entry-item__author flex items-center gap-2 overflow-hidden">
+                  {' '}
+                  <span className="w-12 h-12 rounded-full bg-gray-200 flex-none">
+                    <Avatar authorAddress={data.post[1]} />
+                  </span>
+                  <span className="overflow-auto w-full truncate w-12">
+                    <>
+                      <span>{data.post[1]}</span>
+                      <br />
+                      {parseDateFromBigInt(data.post[2])}
+                    </>
+                  </span>
+                </div>
+
+                <div className="blog-entry-item__content pb-24 py-6">
+                  <div className="prose prose-lg dark:prose-invert blog-entry__content">
+                    {!isValidating ? (
+                      <ReactMarkdown>
+                        {cleanMarkdownContent(String(data.md.value))}
+                      </ReactMarkdown>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="blog-list-item__excerpt w-full h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-3/4 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-3/4 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                        <div className="blog-list-item__excerpt w-1/2 h-3 bg-teal-700 dark:bg-teal-200 opacity-40 rounded-md"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
+              <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
+                <div className="blog-entry-item__author text-lg flex items-center gap-2 overflow-hidden">
+                  {' '}
+                  <span className="w-16 h-16 rounded-full bg-gray-200 flex-none">
+                    <Avatar authorAddress={data.post[1]} size={64} />
+                  </span>
+                  <span className="truncate">{data.post[1]}</span>
+                </div>
+                <h6 className="uppercase text-xs pt-4 font-bold">
+                  Additional Info
+                </h6>
+                <p className="blog-entry-meta flex justify-between text-sm mt-2">
+                  <>
+                    <span>Published:</span> {parseDateFromBigInt(data.post[2])}
+                  </>
+                </p>
+                <p className="blog-entry-meta flex justify-between text-sm mt-2">
+                  <span className="pr-4 ">CID:</span>{' '}
+                  <span className="block overflow-hidden">
+                    <Truncate text={data.post[0]} cid={true} />
+                  </span>
+                </p>
+                <p className="blog-entry-meta flex justify-between text-sm mt-2">
+                  <span>Contract:</span>{' '}
+                  <a
+                    href={`https://mumbai.polygonscan.com/address/${contract.address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Truncate text={contract.address} />
+                  </a>
+                </p>
+                <p className="blog-entry-meta flex justify-between text-sm mt-2">
+                  <span>Token Standard:</span> ERC165
+                </p>
+                <p className="blog-entry-meta flex justify-between text-sm mt-2">
+                  <span>View On:</span>{' '}
+                  <span>
+                    <a
+                      href={transformForShare(data.post[0], 'dweb.link')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      dweb.link
+                    </a>{' '}
+                    |{' '}
+                    <a
+                      href={transformForShare(data.post[0], 'w3s.link')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      w3s.link
+                    </a>
+                  </span>
+                </p>
+                <button className="btn mt-10">Pin to IPFS</button>
+              </aside>
             </div>
-            <aside className="blog-aside lg:h-screen lg:sticky lg:top-24">
-              <p className="blog-entry-item__author text-lg flex items-center gap-2">
-                {' '}
-                <span className="w-16 h-16 rounded-full bg-gray-200"></span>
-                {post.author}
-              </p>
-              <h6 className="uppercase text-xs pt-4 font-bold">
-                Additional Info
-              </h6>
-              <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                <span>Published:</span> 1/22/23
-              </p>
-              <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                <span>CID:</span> bafybeif5tduva..unav2okcrhte5cm
-              </p>
-              <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                <span>Contract Address:</span> 0x2ada3ax04ad92hdaca2541a17b
-              </p>
-              <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                <span>Token Standard:</span> ERC21
-              </p>
-              <p className="blog-entry-meta flex justify-between text-sm mt-2">
-                <span>View On:</span>{' '}
-                <span>
-                  <a href="#">dweb.link</a> | <a href="#">ipfs.io</a>
-                </span>
-              </p>
-              <button className="btn mt-10">Pin to IPFS</button>
-            </aside>
-          </div>
+          )}
         </div>
       </div>
-    )
-  } else {
-    return (
-      <div className="post-view container post-not-found">
-        There is no post here.
-      </div>
-    )
-  }
+    </>
+  ) : (
+    <BlogPostSkeleton />
+  )
 }
 
 export default PostView

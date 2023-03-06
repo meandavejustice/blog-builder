@@ -1,9 +1,8 @@
 export interface PostItem {
   title: string
-  cid: string
   excerpt: string
   author: string
-  published: number
+  published: string
   content: string
   thumbnail: string
 }
