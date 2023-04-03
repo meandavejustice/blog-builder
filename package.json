@@ -57,6 +57,7 @@
   "dependencies": {
     "@ensdomains/ens-avatar": "^0.2.1",
     "@sinclair/typebox": "^0.25.21",
+    "chalk": "^5.2.0",
     "conf": "^10.0.0",
     "dayjs": "^1.11.7",
     "ethereum-identicon": "^0.0.4",
@@ -79,6 +80,7 @@
     "remark-stringify": "^10.0.2",
     "swr": "^2.0.3",
     "unified": "^10.1.2",
-    "vfile-matter": "^4.0.1"
+    "vfile-matter": "^4.0.1",
+    "web3.storage": "^4.5.4"
   }
 }
